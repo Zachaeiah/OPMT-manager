@@ -1,0 +1,101 @@
+# =========================
+# PYTHON
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+ENV/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Logs
+*.log
+
+# Unit test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Type checkers
+.mypy_cache/
+.pyre/
+
+# IDE (Python)
+.vscode/
+.idea/
+
+# =========================
+# GRAPHVIZ / OUTPUT FILES
+# =========================
+renders/
+*.png
+*.svg
+*.pdf
+
+# =========================
+# DATA / LOCAL FILES
+# =========================
+*.db
+*.sqlite3
+*.csv
+
+# =========================
+# C / EMBEDDED (GENERAL)
+# =========================
+*.o
+*.obj
+*.elf
+*.bin
+*.hex
+*.map
+*.d
+
+# =========================
+# CODE COMPOSER STUDIO (CCS)
+# =========================
+# Build outputs
+Debug/
+Release/
+
+# CCS project metadata (keep .project if you want shared workspace)
+.settings/
+.metadata/
+
+# Generated config files
+*.ccsproject
+*.project
+*.cproject
+
+# TI specific
+*.out
+
+# =========================
+# CMAKE / BUILD SYSTEMS (if used)
+# =========================
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+
+# =========================
+# OS FILES
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# OPTIONAL (UNCOMMENT IF NEEDED)
+# =========================
+# Keep requirements if you use pip
+# requirements.txt
+
+# Ignore large datasets or exports
+# data/

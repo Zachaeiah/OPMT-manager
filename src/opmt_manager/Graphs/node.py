@@ -44,11 +44,14 @@ class BaseNode(ABC):
         self._validate_extra()
 
     def __setattr__(self, key: str, value: Any) -> None:
-        """
-        Prevent changing the ID after creation.
+        """ Set an attribute on the node, with special handling for the 'id' attribute to ensure it remains immutable after creation.
 
-        This matters because hash/equality depend on ID.
-        Changing it after the node is inside a set/dict can corrupt lookups.
+        Args:
+            key (str): The name of the attribute to set.
+            value (Any): The value to assign to the attribute.
+
+        Raises:
+            AttributeError: If the 'id' attribute is being modified after creation.
         """
         if key == "id" and hasattr(self, "id"):
             raise AttributeError("Node.id is immutable after creation")
@@ -155,6 +158,14 @@ class BaseNode(ABC):
 
     @staticmethod
     def _get_node_id(node: NodeLike) -> NodeId:
+        """ Returns the node ID of the given node, whether it's a NodeLike object or a string. If it's a NodeLike object, it extracts the ID; if it's a string, it validates that it's a non-empty string.
+
+        Args:
+            node (NodeLike): The node for which to get the ID.
+
+        Returns:
+            NodeId: The ID of the node.
+        """
         if isinstance(node, BaseNode):
             return node.id
 
@@ -178,11 +189,12 @@ class BaseNode(ABC):
         self.forward.add(node_id)
 
     def add_backward(self, node: NodeLike) -> None:
-        """ Returns the node ID of the given node, whether it's a NodeLike object or a string. 
+        """ Returns the node ID of the given node, whether it's a NodeLike object or a string.
         If it's a NodeLike object, it extracts the ID; if it's a string, it validates that it's a non-empty string.
 
         Args:
-            node (NodeLike): The node to add as a backward neighbor, which can be either a NodeLike object or a string representing the node ID.
+            node (NodeLike): The node to add as a backward neighbor, which can be either
+            a NodeLike object or a string representing the node ID.
         """
         node_id = self._get_node_id(node)
         self._reject_self_link(node_id)
@@ -217,29 +229,43 @@ class BaseNode(ABC):
         return existed
 
     def connect_to(self, other: BaseNode) -> None:
-        """
-        Connect this node to another node.
+        """ Connect this node to another node.
 
-        Updates both sides:
-            self.forward -> other.id
-            other.backward -> self.id
+        Args:
+            other (BaseNode): The node to connect to.
         """
         self.add_forward(other)
         other.add_backward(self)
 
     def disconnect_from(self, other: BaseNode) -> None:
-        """
-        Disconnect this node from another node.
+        """ Disconnect this node from another node.
 
-        Updates both sides.
+        Args:
+            other (BaseNode): The node to disconnect from.
         """
         self.remove_forward(other)
         other.remove_backward(self)
 
     def has_forward(self, node: NodeLike) -> bool:
+        """ Returns True if the given node is a forward neighbor of this node.
+
+        Args:
+            node (NodeLike): The node to check, which can be either a NodeLike object or a string representing the node ID.
+
+        Returns:
+            bool: True if the node is a forward neighbor, False otherwise.
+        """
         return self._get_node_id(node) in self.forward
 
     def has_backward(self, node: NodeLike) -> bool:
+        """ Returns True if the given node is a backward neighbor of this node.
+
+        Args:
+            node (NodeLike): The node to check, which can be either a NodeLike object or a string representing the node ID.
+
+        Returns:
+            bool: True if the node is a backward neighbor, False otherwise.
+        """
         return self._get_node_id(node) in self.backward
 
     @property
@@ -259,14 +285,22 @@ class BaseNode(ABC):
         return self.out_degree == 0
 
     def _reject_self_link(self, node_id: NodeId) -> None:
+        """ Rejects a node ID if it is the same as this node's ID, preventing self-links in the graph.
+
+        Args:
+            node_id (NodeId): The ID of the node to check.
+
+        Raises:
+            ValueError: If the node ID is the same as this node's ID.
+        """
         if node_id == self.id:
             raise ValueError("node cannot link to itself")
 
     def to_dict(self) -> dict[str, Any]:
-        """
-        Convert node to a JSON-safe dictionary.
+        """ Returns a dictionary representation of the node, including its type, ID, name, and sorted lists of forward and backward neighbor IDs.
 
-        forward/backward are sorted so saved output is deterministic.
+        Returns:
+            dict[str, Any]: A dictionary containing the node's type, ID, name, and sorted lists of forward and backward neighbor IDs.
         """
         return {
             "node_type": self.NODE_TYPE,
@@ -278,6 +312,15 @@ class BaseNode(ABC):
 
     @classmethod
     def from_dict(cls: type[Self], data: Mapping[str, Any]) -> Self:
+        """ Create a node instance from a dictionary representation, ensuring that the provided data is a mapping and contains valid node information.
+
+        Args:
+            cls (type[Self]): The class to instantiate.
+            data (Mapping[str, Any]): The dictionary containing the node information.
+
+        Returns:
+            Self: An instance of the node class initialized with the provided data.
+        """
         if not isinstance(data, Mapping):
             raise TypeError("data must be a mapping")
 

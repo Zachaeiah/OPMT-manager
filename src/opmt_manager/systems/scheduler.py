@@ -26,8 +26,8 @@ class Scheduler:
         self.end_id: str = operation.end.id
 
         # validate that start and end nodes are in the graph
-        self.graph._validate(self.start_id)
-        self.graph._validate(self.end_id)
+        self.graph._require_node(self.start_id)
+        self.graph._require_node(self.end_id)
         
         self.compute()
 
@@ -73,7 +73,7 @@ class Scheduler:
         graph: Graph = self.graph
 
         indegree = {
-            nid: len(graph.predecessors_ids(nid))
+            nid: len(graph.predecessor_ids(nid))
             for nid in task_ids
         }
 
@@ -95,7 +95,7 @@ class Scheduler:
             # store slack cost in result.SC for each node
             result.SC[current] = getattr(node, "slack_cost", 0)
 
-            for nxt in graph.successors_ids(current):
+            for nxt in graph.successor_ids(current):
                 result.ES[nxt] = max(
                     result.ES.get(nxt, 0),
                     result.EF[current]
@@ -116,7 +116,7 @@ class Scheduler:
         graph: Graph = self.graph
 
         outdegree = {
-            nid: len(graph.successors_ids(nid))
+            nid: len(graph.successor_ids(nid))
             for nid in task_ids
         }
 
@@ -134,7 +134,7 @@ class Scheduler:
             duration: float = getattr(node, "duration", 0)
             result.LS[current] = result.LF[current] - duration
 
-            for prev in graph.predecessors_ids(current):
+            for prev in graph.predecessor_ids(current):
                 result.LF[prev] = min(
                     result.LF.get(prev, float("inf")),
                     result.LS[current]
@@ -181,7 +181,7 @@ class Scheduler:
             current_node: Task = self.graph.get_node(current)
 
             next_nodes: List[str] = [
-                nid for nid in self.graph.successors_ids(current)
+                nid for nid in self.graph.successor_ids(current)
                 if getattr(self.graph.get_node(nid), "slack", 1) == 0
                 and getattr(self.graph.get_node(nid), "earliest_start", 0)
                    == getattr(current_node, "earliest_finish", 0)

@@ -282,7 +282,7 @@ class Operation(TaskManager):
 
         while stack:
             current: str = stack.pop()
-            for nxt in self.graph.successors_ids(current):
+            for nxt in self.graph.successor_ids(current):
                 if nxt not in visited:
                     visited.add(nxt)
                     stack.append(nxt)
@@ -303,7 +303,7 @@ class Operation(TaskManager):
 
         while stack:
             current: str = stack.pop()
-            for prev in self.graph.predecessors_ids(current):
+            for prev in self.graph.predecessor_ids(current):
                 if prev not in visited:
                     visited.add(prev)
                     stack.append(prev)
@@ -347,7 +347,7 @@ class Operation(TaskManager):
                     f"Node '{self.graph.get_node(node_id).name}' cannot reach END"
                 )
 
-        if self.end.id in self.graph.successors_ids(self.start.id):
+        if self.end.id in self.graph.successor_ids(self.start.id):
             raise ValueError("Invalid: START connects directly to END")
         
     def __add__(self, other: "Operation") -> "Operation":

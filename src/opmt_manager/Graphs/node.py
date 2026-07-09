@@ -91,7 +91,9 @@ class Node:
         """
         return {
             "id": self.id,
-            "name": self.name
+            "name": self.name,
+            "forward": list(self.forward),
+            "backward": list(self.backward)
         }
 
     @staticmethod

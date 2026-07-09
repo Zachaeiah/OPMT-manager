@@ -16,7 +16,8 @@ class ComposableTask(Task):
         self,
         name: str,
         duration: float,
-        container: Container | None = None
+        container: Container | None = None,
+        **kwargs: dict[str, dict]
     ):
         """ The ComposableTask is a Task that has an 
         associated dependency injection container. 
@@ -32,8 +33,9 @@ class ComposableTask(Task):
             Optional external container to use for 
             dependency management. If not provided, a new 
             container will be created. Defaults to None.
+            **kwargs (dict[str, dict]): Additional keyword arguments for the base Task class.
         """
-        super().__init__(name, duration)
+        super().__init__(name, duration, **kwargs)
 
         # allow external container injection (important for graph execution)
         self.container: Container = container or Container()

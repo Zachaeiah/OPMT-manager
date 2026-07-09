@@ -48,9 +48,9 @@ class Scheduler:
 
         # slack
         for nid in task_ids:
-            result.slack[nid] = (
-                result.LS.get(nid, 0) - result.ES.get(nid, 0)
-            )
+            slack = result.LS.get(nid, 0) - result.ES.get(nid, 0)
+            result.slack[nid] = slack
+            result.SC[nid] = slack * result.SC.get(nid, 0)
 
         # apply to operation (domain owns state)
         for nid in task_ids:
@@ -88,6 +88,12 @@ class Scheduler:
 
             duration: float = getattr(node, "duration", 0)
             result.EF[current] = result.ES[current] + duration
+
+            # running cost and slack cost
+            result.RC[current] = getattr(node, "running_cost", 0) * duration
+
+            # store slack cost in result.SC for each node
+            result.SC[current] = getattr(node, "slack_cost", 0)
 
             for nxt in graph.successors_ids(current):
                 result.ES[nxt] = max(
@@ -221,3 +227,58 @@ class Scheduler:
         )
 
         return cycle_time / total_work
+    
+    def __repr__(self):
+        """Return a readable summary of the schedule and task timing table."""
+
+        cycle_time = self.get_cycle_time()
+        efficiency = self.get_process_efficiency()
+
+        lines = [
+            "",
+            "=" * 110,
+            f"Scheduler: {self.operation.name}",
+            "-" * 110,
+            f"Cycle Time : {cycle_time}",
+            f"Efficiency : {efficiency:.2%}",
+            "-" * 110,
+            (
+                f"{'Task':<38} "
+                f"{'Dur':>5} "
+                f"{'ES':>5} "
+                f"{'EF':>5} "
+                f"{'LS':>5} "
+                f"{'LF':>5} "
+                f"{'Slack':>7} "
+                f"{'Run Cost':>10} "
+                f"{'Slack Cost':>11}"
+            ),
+            "-" * 110,
+        ]
+
+        # Sort tasks in schedule order
+        nodes = sorted(
+            self.graph.node_values(),
+            key=lambda node: (
+                getattr(node, "earliest_start", 0),
+                getattr(node, "earliest_finish", 0),
+                node.name
+            )
+        )
+
+        for node in nodes:
+            lines.append(
+                f"{node.name:<38} "
+                f"{getattr(node, 'duration', 0):>5} "
+                f"{getattr(node, 'earliest_start', 0):>5} "
+                f"{getattr(node, 'earliest_finish', 0):>5} "
+                f"{getattr(node, 'latest_start', 0):>5} "
+                f"{getattr(node, 'latest_finish', 0):>5} "
+                f"{getattr(node, 'slack', 0):>7} "
+                f"{getattr(node, 'running_cost', 0):>10} "
+                f"{getattr(node, 'slack_cost', 0):>11}"
+            )
+
+        lines.append("=" * 110)
+
+        return "\n".join(lines)
